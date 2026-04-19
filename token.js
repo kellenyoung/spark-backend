@@ -10,7 +10,7 @@ app.get("/", (req, res) => {
   res.send("Backend running");
 });
 
-app.get("/token", async (req, res) => {
+app.get("/token", (req, res) => {
   try {
     const room = req.query.room || "default-room";
     const name = req.query.name || "guest";
@@ -30,7 +30,7 @@ app.get("/token", async (req, res) => {
       canSubscribe: true,
     });
 
-    const token = await at.toJwt();
+    const token = at.toJwt();
 
     res.json({
       token,
