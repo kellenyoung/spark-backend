@@ -13,14 +13,34 @@ app.get("/", (req, res) => {
 });
 
 app.get("/token", (req, res) => {
-  res.json({
-    token: "working",
-    url: "working"
-  });
-});
+  try {
+    const room = req.query.room || "default-room";
+    const name = req.query.name || "guest";
 
-const PORT = process.env.PORT || 3000;
+    const payload = {
+      iss: process.env.LIVEKIT_API_KEY,
+      sub: name,
+      video: {
+        roomJoin: true,
+        room: room,
+        canPublish: true,
+        canSubscribe: true
+      }
+    };
 
-app.listen(PORT, () => {
-  console.log("Server running on port", PORT);
+    const token = jwt.sign(
+      payload,
+      process.env.LIVEKIT_API_SECRET,
+      { expiresIn: "1h" }
+    );
+
+    res.json({
+      token,
+      url: process.env.LIVEKIT_URL
+    });
+
+  } catch (err) {
+    console.error("Token error:", err);
+    res.status(500).json({ error: err.message });
+  }
 });
