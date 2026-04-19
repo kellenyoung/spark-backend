@@ -21,10 +21,20 @@ app.get("/token", (req, res) => {
     const room = req.query.room || "default-room";
     const name = req.query.name || "guest";
 
-    console.log("Room:", room, "Name:", name);
+    const API_KEY = process.env.LIVEKIT_API_KEY;
+    const API_SECRET = process.env.LIVEKIT_API_SECRET;
+    const LIVEKIT_URL = process.env.LIVEKIT_URL;
+
+    // 🚨 safety check (this is what was missing before)
+    if (!API_KEY || !API_SECRET || !LIVEKIT_URL) {
+      console.error("❌ Missing environment variables");
+      return res.status(500).json({
+        error: "Missing LiveKit environment variables"
+      });
+    }
 
     const payload = {
-      iss: "test",
+      iss: API_KEY,
       sub: name,
       video: {
         roomJoin: true,
@@ -34,25 +44,15 @@ app.get("/token", (req, res) => {
       }
     };
 
-    console.log("Payload built");
-
-    const token = jwt.sign(payload, "test-secret", { expiresIn: "1h" });
-
-    console.log("Token created");
+    const token = jwt.sign(payload, API_SECRET, { expiresIn: "1h" });
 
     res.json({
       token,
-      url: "test"
+      url: LIVEKIT_URL
     });
 
   } catch (err) {
     console.error("❌ Token error:", err);
     res.status(500).json({ error: err.message });
   }
-});
-
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log("🚀 Server running on port", PORT);
 });
