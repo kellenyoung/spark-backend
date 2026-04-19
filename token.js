@@ -10,11 +10,10 @@ app.get("/", (req, res) => {
   res.send("Backend running");
 });
 
-// TEMP: no LiveKit yet (we confirm server works first)
-const { AccessToken } = require("livekit-server-sdk");
-
 app.get("/token", (req, res) => {
   try {
+    const { AccessToken } = require("livekit-server-sdk");
+
     const room = req.query.room || "default-room";
     const name = req.query.name || "guest";
 
@@ -36,12 +35,12 @@ app.get("/token", (req, res) => {
     const token = at.toJwt();
 
     res.json({
-      token: token,
+      token,
       url: process.env.LIVEKIT_URL,
     });
 
   } catch (err) {
     console.error("Token error:", err);
-    res.status(500).json({ error: "Token generation failed" });
+    res.status(500).json({ error: err.message });
   }
 });
