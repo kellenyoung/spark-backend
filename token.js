@@ -10,33 +10,34 @@ app.get("/", (req, res) => {
   res.send("Backend running");
 });
 
+const jwt = require("jsonwebtoken");
+
 app.get("/token", (req, res) => {
   try {
-    const { AccessToken } = require("livekit-server-sdk");
-
     const room = req.query.room || "default-room";
     const name = req.query.name || "guest";
 
-    const at = new AccessToken(
-      process.env.LIVEKIT_API_KEY,
-      process.env.LIVEKIT_API_SECRET,
-      {
-        identity: name,
-      }
-    );
-
-    at.addGrant({
-      roomJoin: true,
+    const payload = {
+      iss: process.env.LIVEKIT_API_KEY,
+      sub: name,
       room: room,
-      canPublish: true,
-      canSubscribe: true,
-    });
+      video: {
+        roomJoin: true,
+        room: room,
+        canPublish: true,
+        canSubscribe: true
+      }
+    };
 
-    const token = at.toJwt();
+    const token = jwt.sign(
+      payload,
+      process.env.LIVEKIT_API_SECRET,
+      { expiresIn: "1h" }
+    );
 
     res.json({
       token,
-      url: process.env.LIVEKIT_URL,
+      url: process.env.LIVEKIT_URL
     });
 
   } catch (err) {
