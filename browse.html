@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Explore</title>
+  <link rel="stylesheet" href="golive.css?v=60" />
+</head>
+
+<body class="homepage-body">
+  <div class="homepage-shell">
+
+    <h1>Explore Classes</h1>
+    <p class="hero-sub">Find sessions for your mind and body</p>
+
+    <div id="grid" class="browse-grid"></div>
+
+  </div>
+
+  <script>
+    const classes = JSON.parse(localStorage.getItem("spark_upcoming_classes") || []);
+
+    const grid = document.getElementById("grid");
+
+    grid.innerHTML = classes.map(c => `
+      <div class="browse-card">
+
+        ${c.image ? `<img src="${c.image}" class="browse-thumb" />` : ""}
+
+        <div class="browse-card-title">${c.title}</div>
+
+        <div class="browse-teacher">
+          ${c.teacher?.img ? `<img src="${c.teacher.img}" />` : ""}
+          <div>${c.teacher?.name || "Instructor"}</div>
+        </div>
+
+        <div class="muted">${c.time}</div>
+
+        <a href="class.html?id=${c.id}" class="hero-primary small-btn">
+          Join
+        </a>
+
+      </div>
+    `).join("");
+  </script>
+</body>
+</html>

@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Go Live</title>
+  <link rel="stylesheet" href="golive.css?v=32" />
+  <script src="https://cdn.jsdelivr.net/npm/livekit-client@2.5.7/dist/livekit-client.umd.min.js"></script>
+</head>
+
+<body>
+  <div class="studio">
+
+    <video id="camera" autoplay muted></video>
+    <div id="videoGrid" class="video-grid"></div>
+
+    <button id="startBtn">Start Class</button>
+    <button id="endBtn">End Class</button>
+
+    <div id="participants"></div>
+
+  </div>
+
+  <script>
+    if (!window.LiveKit) {
+  console.error("LiveKit failed to load");
+} else {
+  const { connect } = window.LiveKit;
+}
+
+    const ROOM = "class-" + new URLSearchParams(location.search).get("id");
+
+    let room;
+    let participants = [];
+
+    function render() {
+      document.getElementById("participants").innerHTML =
+        participants.map(p => `<div>${p}</div>`).join("");
+    }
+
+    startBtn.onclick = async () => {
+      const res = await fetch("https://sputter-saffron-boggle.ngrok-free.dev/token");
+      const data = await res.json();
+
+      room = await connect(data.url, data.token);
+
+      const video = await createLocalVideoTrack();
+      const audio = await createLocalAudioTrack();
+
+      camera.srcObject = new MediaStream([video.mediaStreamTrack]);
+
+      await room.localParticipant.publishTrack(video);
+      await room.localParticipant.publishTrack(audio);
+
+      sendState("live");
+    };
+
+    endBtn.onclick = () => {
+      sendState("ended");
+      room.disconnect();
+    };
+
+    function sendState(state) {
+      room.localParticipant.publishData(
+        new TextEncoder().encode(JSON.stringify({
+          type: "state",
+          value: state
+        }))
+      );
+    }
+
+    room?.on?.("dataReceived", (payload) => {
+      const msg = JSON.parse(new TextDecoder().decode(payload));
+
+      if (msg.type === "join") participants.push(msg.name);
+      if (msg.type === "leave") participants = participants.filter(p => p !== msg.name);
+
+      render();
+    });
+  </script>
+</body>
+</html>

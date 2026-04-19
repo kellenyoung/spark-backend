@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Your Studio</title>
+  <link rel="stylesheet" href="golive.css?v=110" />
+</head>
+
+<body class="homepage-body">
+
+  <div class="homepage-shell">
+
+    <h1>Your Studio</h1>
+    <p class="hero-sub">Manage your classes and go live</p>
+
+    <!-- PROFILE -->
+    <div class="panel-card profile-card">
+
+      <div class="profile-left">
+        <img id="profileImg" class="teacher-avatar" />
+        <input type="file" id="uploadImg" />
+      </div>
+
+      <div class="profile-right">
+        <input id="teacherName" placeholder="Your name" />
+        <textarea id="teacherBio" placeholder="Your teaching style"></textarea>
+
+        <button id="saveProfile" class="hero-primary">Save Profile</button>
+      </div>
+
+    </div>
+
+    <!-- CREATE -->
+    <div class="panel-card">
+
+      <h3>Create New Session</h3>
+
+      <div class="create-grid">
+        <input id="classTitle" placeholder="Session name" />
+        <input id="classTime" placeholder="Time" />
+      </div>
+
+      <input type="file" id="classImage" />
+
+      <button id="createClassBtn" class="hero-primary">Create Session</button>
+
+    </div>
+
+    <!-- SESSIONS -->
+    <div class="panel-card">
+
+      <h3>Your Sessions</h3>
+      <div id="sessionsGrid" class="browse-grid"></div>
+
+    </div>
+
+  </div>
+
+  <script>
+    const PROFILE_KEY = "spark_teacher_profile";
+    const CLASS_KEY = "spark_upcoming_classes";
+    const LIVE_KEY = "spark_live_class_id";
+
+    const profileImg = document.getElementById("profileImg");
+
+    function loadProfile() {
+      const data = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}");
+
+      if (data.img) profileImg.src = data.img;
+      if (data.name) teacherName.value = data.name;
+      if (data.bio) teacherBio.value = data.bio;
+    }
+
+    document.getElementById("uploadImg").onchange = (e) => {
+      const reader = new FileReader();
+      reader.onload = () => profileImg.src = reader.result;
+      if (e.target.files[0]) reader.readAsDataURL(e.target.files[0]);
+    };
+
+    document.getElementById("saveProfile").onclick = () => {
+      localStorage.setItem(PROFILE_KEY, JSON.stringify({
+        name: teacherName.value,
+        bio: teacherBio.value,
+        img: profileImg.src
+      }));
+      alert("Saved");
+    };
+
+    document.getElementById("createClassBtn").onclick = () => {
+      const classes = JSON.parse(localStorage.getItem(CLASS_KEY) || "[]");
+      const teacher = JSON.parse(localStorage.getItem(PROFILE_KEY) || "{}");
+
+      const reader = new FileReader();
+
+      reader.onload = () => {
+        classes.push({
+          id: Date.now(),
+          title: classTitle.value,
+          time: classTime.value,
+          image: reader.result,
+          teacher
+        });
+
+        localStorage.setItem(CLASS_KEY, JSON.stringify(classes));
+        renderSessions();
+        alert("Session created");
+      };
+
+      const file = classImage.files[0];
+      if (file) reader.readAsDataURL(file);
+      else reader.onload();
+    };
+
+    function deleteSession(id) {
+      let classes = JSON.parse(localStorage.getItem(CLASS_KEY) || "[]");
+      classes = classes.filter(c => c.id !== id);
+      localStorage.setItem(CLASS_KEY, JSON.stringify(classes));
+      renderSessions();
+    }
+
+    function copyLink(id) {
+      const link = `${location.origin}/class.html?id=${id}`;
+      navigator.clipboard.writeText(link);
+      alert("Invite link copied!");
+    }
+
+    function goLive(id) {
+      localStorage.setItem(LIVE_KEY, id);
+      renderSessions();
+      window.open(`golive.html?id=${id}`, "_blank");
+    }
+
+    function isLive(id) {
+      return localStorage.getItem(LIVE_KEY) == id;
+    }
+
+    function renderSessions() {
+      const classes = JSON.parse(localStorage.getItem(CLASS_KEY) || []);
+      const grid = document.getElementById("sessionsGrid");
+
+      if (!classes.length) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            No sessions yet 🌿<br/>
+            Create your first session above.
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = classes.map(c => `
+        <div class="browse-card">
+
+          ${c.image ? `<img src="${c.image}" class="browse-thumb" />` : ""}
+
+          <div class="browse-card-title">${c.title}</div>
+          <div class="muted">${c.time}</div>
+
+          <div class="live-indicator">
+            ${isLive(c.id) ? "🟢 LIVE" : "⚪ OFFLINE"}
+          </div>
+
+          <div class="session-actions">
+
+            <button onclick="goLive(${c.id})" class="hero-primary small-btn">
+              Go Live
+            </button>
+
+            <button onclick="copyLink(${c.id})" class="secondary-btn">
+              Copy Link
+            </button>
+
+            <button onclick="deleteSession(${c.id})" class="danger-btn">
+              Delete
+            </button>
+
+          </div>
+
+        </div>
+      `).join("");
+    }
+
+    loadProfile();
+    renderSessions();
+  </script>
+
+</body>
+</html>

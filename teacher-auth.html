@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Teacher Access</title>
+  <link rel="stylesheet" href="golive.css?v=36" />
+</head>
+
+<body class="homepage-body">
+  <div class="homepage-shell">
+
+    <h1>Teach on Spark</h1>
+
+    <div class="panel-card">
+
+      <div id="modeToggle">
+        <button onclick="setMode('login')">Log In</button>
+        <button onclick="setMode('signup')">Sign Up</button>
+      </div>
+
+      <form id="authForm">
+
+        <input id="name" placeholder="Your name (signup only)" />
+        <input id="email" placeholder="Email" required />
+        <input id="password" type="password" placeholder="Password" required />
+
+        <button id="submitBtn">Continue</button>
+      </form>
+
+      <div id="authMsg" class="muted"></div>
+
+    </div>
+
+  </div>
+
+  <script>
+    const USERS_KEY = "spark_teachers";
+    const SESSION_KEY = "spark_teacher_session";
+
+    let mode = "login";
+
+    function setMode(m) {
+      mode = m;
+
+      document.getElementById("name").style.display =
+        m === "signup" ? "block" : "none";
+    }
+
+    setMode("login");
+
+    authForm.onsubmit = (e) => {
+      e.preventDefault();
+
+      const users = JSON.parse(localStorage.getItem(USERS_KEY) || "[]");
+
+      const email = emailInput.value;
+      const password = passwordInput.value;
+      const name = nameInput.value;
+
+      if (mode === "signup") {
+        if (users.find(u => u.email === email)) {
+          authMsg.textContent = "User already exists";
+          return;
+        }
+
+        users.push({ email, password, name });
+
+        localStorage.setItem(USERS_KEY, JSON.stringify(users));
+        localStorage.setItem(SESSION_KEY, email);
+
+        location.href = "teacher-profile.html";
+      }
+
+      if (mode === "login") {
+        const user = users.find(u => u.email === email && u.password === password);
+
+        if (!user) {
+          authMsg.textContent = "Invalid login";
+          return;
+        }
+
+        localStorage.setItem(SESSION_KEY, email);
+        location.href = "teacher-profile.html";
+      }
+    };
+
+    const nameInput = document.getElementById("name");
+    const emailInput = document.getElementById("email");
+    const passwordInput = document.getElementById("password");
+    const authMsg = document.getElementById("authMsg");
+  </script>
+</body>
+</html>

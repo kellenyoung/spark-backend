@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Spark</title>
+
+  <link rel="stylesheet" href="golive.css?v=50" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body class="homepage-body">
+
+  <div class="homepage-shell">
+
+    <!-- NAV -->
+    <header class="home-nav fade-in">
+      <div class="home-logo">⚡ Spark</div>
+
+      <div class="home-nav-actions">
+        <a href="student-auth.html" class="nav-link">Log in</a>
+        <a href="teacher-auth.html" class="nav-button">Teach</a>
+      </div>
+    </header>
+
+    <!-- HERO -->
+    <section class="hero fade-in delay-1">
+
+      <h1 class="hero-title">
+        Wellness classes,<br />
+        built for real connection
+      </h1>
+
+      <p class="hero-sub">
+        Join live sessions in mindfulness, movement, and personal growth.
+        Connect with instructors and a community that grows together.
+      </p>
+
+      <div class="hero-actions">
+        <a href="browse.html" class="hero-primary">Explore Classes</a>
+        <a href="teacher-auth.html" class="hero-secondary">Teach a Class</a>
+      </div>
+
+    </section>
+
+    <!-- 🌿 VALUE STRIP -->
+    <section class="feature-strip fade-in delay-2">
+
+      <div class="feature">
+        <div class="feature-title">Mind & Body</div>
+        <div class="feature-text">Yoga, breathwork, meditation & more</div>
+      </div>
+
+      <div class="feature">
+        <div class="feature-title">Live Community</div>
+        <div class="feature-text">Real-time interaction, not passive watching</div>
+      </div>
+
+      <div class="feature">
+        <div class="feature-title">Guided Growth</div>
+        <div class="feature-text">Learn directly from experienced instructors</div>
+      </div>
+
+    </section>
+
+    <!-- 🔴 LIVE -->
+    <section class="live-now fade-in delay-3">
+      <h2>Happening Now</h2>
+      <div id="liveNowGrid" class="live-grid"></div>
+    </section>
+
+  </div>
+
+  <script>
+    const CLASS_KEY = "spark_upcoming_classes";
+
+    function renderLive() {
+      const classes = JSON.parse(localStorage.getItem(CLASS_KEY) || []);
+      const grid = document.getElementById("liveNowGrid");
+
+      if (!classes.length) {
+        grid.innerHTML = "<div class='muted'>No sessions yet</div>";
+        return;
+      }
+
+      grid.innerHTML = classes.slice(0,3).map(c => `
+        <div class="live-card">
+
+          ${c.image ? `<img src="${c.image}" class="live-thumb-img" />` : ""}
+
+          <div class="live-title">${c.title}</div>
+
+          <div class="live-teacher">
+            ${c.teacher?.img ? `<img src="${c.teacher.img}" />` : ""}
+            <span>${c.teacher?.name || "Instructor"}</span>
+          </div>
+
+          <a href="class.html?id=${c.id}" class="live-join">Join Session</a>
+
+        </div>
+      `).join("");
+    }
+
+    renderLive();
+  </script>
+
+</body>
+</html>

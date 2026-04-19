@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Your Space</title>
+  <link rel="stylesheet" href="golive.css?v=80" />
+</head>
+
+<body class="homepage-body">
+
+  <div class="homepage-shell">
+
+    <h1>Your Space</h1>
+    <p class="hero-sub">
+      Your upcoming sessions and saved classes
+    </p>
+
+    <!-- UPCOMING -->
+    <section class="dashboard-section">
+
+      <h3>Upcoming Sessions</h3>
+      <div id="upcomingGrid" class="browse-grid"></div>
+
+    </section>
+
+    <!-- SAVED -->
+    <section class="dashboard-section">
+
+      <h3>Saved Sessions</h3>
+      <div id="savedGrid" class="browse-grid"></div>
+
+    </section>
+
+  </div>
+
+  <script>
+    const CLASS_KEY = "spark_upcoming_classes";
+    const SAVE_KEY = "spark_saved_classes";
+
+    function loadClasses() {
+      return JSON.parse(localStorage.getItem(CLASS_KEY) || "[]");
+    }
+
+    function loadSaved() {
+      return JSON.parse(localStorage.getItem(SAVE_KEY) || "[]");
+    }
+
+    function renderUpcoming() {
+      const classes = loadClasses();
+      const grid = document.getElementById("upcomingGrid");
+
+      if (!classes.length) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            You don’t have any upcoming sessions yet 🌿<br/>
+            Explore and join a class to get started.
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = classes.slice(0, 3).map(c => `
+        <div class="browse-card">
+
+          ${c.image ? `<img src="${c.image}" class="browse-thumb" />` : ""}
+
+          <div class="browse-card-title">${c.title}</div>
+
+          <div class="browse-teacher">
+            ${c.teacher?.img ? `<img src="${c.teacher.img}" />` : ""}
+            <div>${c.teacher?.name || "Instructor"}</div>
+          </div>
+
+          <div class="muted">${c.time || ""}</div>
+
+          <a href="class.html?id=${c.id}" class="hero-primary small-btn">
+            Join
+          </a>
+
+        </div>
+      `).join("");
+    }
+
+    function renderSaved() {
+      const classes = loadClasses();
+      const saved = loadSaved();
+
+      const grid = document.getElementById("savedGrid");
+
+      const filtered = classes.filter(c => saved.includes(c.id));
+
+      if (!filtered.length) {
+        grid.innerHTML = `
+          <div class="empty-state">
+            You haven’t saved any sessions yet ✨<br/>
+            Browse classes and save ones you’re interested in.
+          </div>
+        `;
+        return;
+      }
+
+      grid.innerHTML = filtered.map(c => `
+        <div class="browse-card">
+
+          ${c.image ? `<img src="${c.image}" class="browse-thumb" />` : ""}
+
+          <div class="browse-card-title">${c.title}</div>
+
+          <div class="browse-teacher">
+            ${c.teacher?.img ? `<img src="${c.teacher.img}" />` : ""}
+            <div>${c.teacher?.name || "Instructor"}</div>
+          </div>
+
+          <div class="muted">${c.time || ""}</div>
+
+          <a href="class.html?id=${c.id}" class="hero-primary small-btn">
+            Join
+          </a>
+
+        </div>
+      `).join("");
+    }
+
+    renderUpcoming();
+    renderSaved();
+  </script>
+
+</body>
+</html>

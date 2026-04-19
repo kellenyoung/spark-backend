@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Class</title>
+  <link rel="stylesheet" href="golive.css?v=60" />
+  <script src="./node_modules/livekit-client/dist/livekit-client.umd.js"></script>
+</head>
+
+<body>
+  <div class="studio">
+
+    <!-- HEADER -->
+    <header class="studio-header">
+      <div id="liveBadge" class="live-badge">LIVE</div>
+
+      <div class="studio-title">
+        <div id="classTitleDisplay">Live Session</div>
+        <div class="studio-sub">Wellness & community experience</div>
+      </div>
+    </header>
+
+    <!-- MAIN -->
+    <main class="studio-main">
+
+      <!-- VIDEO -->
+      <div class="video-area">
+        <div id="waitingState">Waiting for instructor...</div>
+        <div id="videoGrid"></div>
+      </div>
+
+      <!-- SIDEBAR -->
+      <aside class="side-panel">
+
+        <div class="panel-card">
+          <h3>Participants</h3>
+          <div id="participants"></div>
+        </div>
+
+        <div class="panel-card">
+          <h3>Live Chat</h3>
+
+          <div id="chatMessages" class="chat-messages"></div>
+
+          <form id="chatForm">
+            <input id="chatInput" placeholder="Share something..." />
+            <button>Send</button>
+          </form>
+        </div>
+
+      </aside>
+
+    </main>
+  </div>
+
+  <script>
+    const { connect } = window.LiveKit;
+
+    const SESSION = "spark_student_session";
+    const USERS = "spark_students";
+
+    let room;
+    let userName;
+
+    const participants = new Set();
+
+    function getUser() {
+      const email = localStorage.getItem(SESSION);
+      const users = JSON.parse(localStorage.getItem(USERS) || "[]");
+      return users.find(u => u.email === email);
+    }
+
+    function getClassId() {
+      return new URLSearchParams(location.search).get("id");
+    }
+
+    function addMessage(name, text, system=false) {
+      const div = document.createElement("div");
+      div.className = "chat-msg";
+
+      div.innerHTML = system
+        ? `<em>${text}</em>`
+        : `<strong>${name}:</strong> ${text}`;
+
+      chatMessages.appendChild(div);
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    async function init() {
+      const user = getUser();
+
+      if (!user) {
+        location.href = "student-auth.html";
+        return;
+      }
+
+      userName = user.name;
+
+      const res = await fetch("https://sputter-saffron-boggle.ngrok-free.dev/token");
+      const data = await res.json();
+
+      room = await connect(data.url, data.token);
+
+      room.on("dataReceived", (payload) => {
+        const msg = JSON.parse(new TextDecoder().decode(payload));
+
+        if (msg.type === "chat") addMessage(msg.name, msg.message);
+        if (msg.type === "join") addMessage("", msg.name + " joined", true);
+      });
+
+      document.getElementById("chatForm").onsubmit = (e) => {
+        e.preventDefault();
+
+        const msg = chatInput.value;
+
+        room.localParticipant.publishData(
+          new TextEncoder().encode(JSON.stringify({
+            type: "chat",
+            name: userName,
+            message: msg
+          }))
+        );
+
+        addMessage("You", msg);
+        chatInput.value = "";
+      };
+    }
+
+    init();
+  </script>
+</body>
+</html>

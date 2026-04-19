@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Student Access</title>
+  <link rel="stylesheet" href="golive.css?v=37" />
+</head>
+
+<body class="homepage-body">
+  <div class="homepage-shell">
+
+    <h1>Join Spark</h1>
+
+    <div class="panel-card">
+
+      <div>
+        <button onclick="setMode('login')">Log In</button>
+        <button onclick="setMode('signup')">Sign Up</button>
+      </div>
+
+      <form id="form">
+        <input id="name" placeholder="Name (signup)" />
+        <input id="email" placeholder="Email" required />
+        <input id="password" type="password" required />
+        <button>Continue</button>
+      </form>
+
+      <div id="msg"></div>
+
+    </div>
+  </div>
+
+  <script>
+    const USERS = "spark_students";
+    const SESSION = "spark_student_session";
+
+    let mode = "login";
+
+    function setMode(m) {
+      mode = m;
+      name.style.display = m === "signup" ? "block" : "none";
+    }
+
+    setMode("login");
+
+    form.onsubmit = (e) => {
+      e.preventDefault();
+
+      let users = JSON.parse(localStorage.getItem(USERS) || "[]");
+
+      if (mode === "signup") {
+        users.push({
+          name: name.value,
+          email: email.value,
+          password: password.value
+        });
+
+        localStorage.setItem(USERS, JSON.stringify(users));
+        localStorage.setItem(SESSION, email.value);
+      }
+
+      if (mode === "login") {
+        const user = users.find(u =>
+          u.email === email.value && u.password === password.value
+        );
+
+        if (!user) {
+          msg.textContent = "Invalid login";
+          return;
+        }
+
+        localStorage.setItem(SESSION, user.email);
+      }
+
+      location.href = "browse.html";
+    };
+  </script>
+</body>
+</html>
