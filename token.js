@@ -10,7 +10,7 @@ app.get("/", (req, res) => {
   res.send("Backend running");
 });
 
-app.get("/token", (req, res) => {
+app.get("/token", async (req, res) => {
   try {
     const room = req.query.room || "default-room";
     const name = req.query.name || "guest";
@@ -30,10 +30,10 @@ app.get("/token", (req, res) => {
       canSubscribe: true,
     });
 
-    const token = at.toJwt();
+    const token = await at.toJwt();
 
     res.json({
-      token: token,
+      token,
       url: process.env.LIVEKIT_URL,
     });
 
@@ -41,10 +41,4 @@ app.get("/token", (req, res) => {
     console.error("Token error:", err);
     res.status(500).json({ error: "Token generation failed" });
   }
-});
-
-const PORT = process.env.PORT || 3000;
-
-app.listen(PORT, () => {
-  console.log("Server running on port", PORT);
 });
