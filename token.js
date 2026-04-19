@@ -26,8 +26,8 @@ app.get("/token", (req, res) => {
   const token = at.toJwt();
 
   res.json({
-    token,
-    url: "wss://spark-83iz2caa.livekit.cloud"
+    token: "test",
+    url: "wss://test"
   });
 });
 
