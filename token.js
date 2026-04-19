@@ -1,4 +1,5 @@
 console.log("🔥 STARTING SERVER FILE");
+const jwt = require("jsonwebtoken");
 
 const express = require("express");
 const cors = require("cors");
