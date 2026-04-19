@@ -1,5 +1,6 @@
 const express = require("express");
 const cors = require("cors");
+const { AccessToken } = require("livekit-server-sdk");
 
 const app = express();
 
@@ -9,16 +10,14 @@ app.get("/", (req, res) => {
   res.send("Backend running");
 });
 
-const { AccessToken } = require("livekit-server-sdk");
-
 app.get("/token", (req, res) => {
   try {
     const room = req.query.room || "default-room";
     const name = req.query.name || "guest";
 
     const at = new AccessToken(
-      process.env.APIHhCSZmAy8QZ8,
-      process.env.voUPrcBFYZKE9sO6q3zMmjcSXYWbe8bx7tJ3v88k81X,
+      process.env.LIVEKIT_API_KEY,
+      process.env.LIVEKIT_API_SECRET,
       {
         identity: name,
       }
@@ -34,8 +33,8 @@ app.get("/token", (req, res) => {
     const token = at.toJwt();
 
     res.json({
-      token,
-      url: process.env.wss://spark-83iz2caa.livekit.cloud,
+      token: token,
+      url: process.env.LIVEKIT_URL,
     });
 
   } catch (err) {
