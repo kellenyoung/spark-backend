@@ -14,14 +14,22 @@ app.get("/", (req, res) => {
 });
 
 app.get("/token", (req, res) => {
-  res.json({
-    token: "no-jwt-yet",
-    url: process.env.LIVEKIT_URL || "test"
-  });
-});
+  try {
+    const jwt = require("jsonwebtoken");
 
-const PORT = process.env.PORT || 3000;
+    const token = jwt.sign(
+      { test: true },
+      "test-secret",
+      { expiresIn: "1h" }
+    );
 
-app.listen(PORT, () => {
-  console.log("🚀 Server running on port", PORT);
+    res.json({
+      token,
+      url: process.env.LIVEKIT_URL || "test"
+    });
+
+  } catch (err) {
+    console.error("JWT error:", err);
+    res.status(500).json({ error: err.message });
+  }
 });
