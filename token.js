@@ -1,3 +1,4 @@
+console.log("ENV TEST:", process.env.TEST_VAR);
 console.log("🔥 STARTING SERVER FILE");
 
 const express = require("express");
