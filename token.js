@@ -11,15 +11,37 @@ app.get("/", (req, res) => {
 });
 
 // TEMP: no LiveKit yet (we confirm server works first)
+const { AccessToken } = require("livekit-server-sdk");
+
 app.get("/token", (req, res) => {
-  res.json({
-    token: "working",
-    url: "working"
-  });
-});
+  try {
+    const room = req.query.room || "default-room";
+    const name = req.query.name || "guest";
 
-const PORT = process.env.PORT || 3000;
+    const at = new AccessToken(
+      process.env.LIVEKIT_API_KEY,
+      process.env.LIVEKIT_API_SECRET,
+      {
+        identity: name,
+      }
+    );
 
-app.listen(PORT, () => {
-  console.log("Server running on port", PORT);
+    at.addGrant({
+      roomJoin: true,
+      room: room,
+      canPublish: true,
+      canSubscribe: true,
+    });
+
+    const token = at.toJwt();
+
+    res.json({
+      token: token,
+      url: process.env.LIVEKIT_URL,
+    });
+
+  } catch (err) {
+    console.error("Token error:", err);
+    res.status(500).json({ error: "Token generation failed" });
+  }
 });
