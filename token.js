@@ -1,4 +1,5 @@
 console.log("🔥 STARTING SERVER FILE");
+
 const express = require("express");
 const cors = require("cors");
 
@@ -6,43 +7,19 @@ const app = express();
 
 app.use(cors());
 
-// Simple health check
 app.get("/", (req, res) => {
   res.send("Backend running");
 });
 
-const jwt = require("jsonwebtoken");
-
 app.get("/token", (req, res) => {
-  try {
-    const room = req.query.room || "default-room";
-    const name = req.query.name || "guest";
+  res.json({
+    token: "working",
+    url: "working"
+  });
+});
 
-    const payload = {
-      iss: process.env.LIVEKIT_API_KEY,
-      sub: name,
-      room: room,
-      video: {
-        roomJoin: true,
-        room: room,
-        canPublish: true,
-        canSubscribe: true
-      }
-    };
+const PORT = process.env.PORT || 3000;
 
-    const token = jwt.sign(
-      payload,
-      process.env.LIVEKIT_API_SECRET,
-      { expiresIn: "1h" }
-    );
-
-    res.json({
-      token,
-      url: process.env.LIVEKIT_URL
-    });
-
-  } catch (err) {
-    console.error("Token error:", err);
-    res.status(500).json({ error: err.message });
-  }
+app.listen(PORT, () => {
+  console.log("Server running on port", PORT);
 });
