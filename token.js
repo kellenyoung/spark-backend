@@ -1,3 +1,4 @@
+console.log("🔥 STARTING SERVER FILE");
 const express = require("express");
 const cors = require("cors");
 
