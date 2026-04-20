@@ -14,22 +14,20 @@ app.get("/", (req, res) => {
 });
 
 app.get("/token", (req, res) => {
-  try {
-    const jwt = require("jsonwebtoken");
+  res.json({
+    token: "working",
+    url: "working"
+  });
+});
 
-    const token = jwt.sign(
-      { test: true },
-      "test-secret",
-      { expiresIn: "1h" }
-    );
+// 👇 THIS IS THE PART YOU JUST FIXED
+const PORT = process.env.PORT;
 
-    res.json({
-      token,
-      url: process.env.LIVEKIT_URL || "test"
-    });
+if (!PORT) {
+  console.error("❌ PORT is missing");
+  process.exit(1);
+}
 
-  } catch (err) {
-    console.error("JWT error:", err);
-    res.status(500).json({ error: err.message });
-  }
+app.listen(PORT, "0.0.0.0", () => {
+  console.log("🚀 Server running on port", PORT);
 });
