@@ -14,20 +14,41 @@ app.get("/", (req, res) => {
 });
 
 app.get("/token", (req, res) => {
-  res.json({
-    token: "working",
-    url: "working"
-  });
-});
+  try {
+    const jwt = require("jsonwebtoken");
 
-// 👇 THIS IS THE PART YOU JUST FIXED
-const PORT = process.env.PORT;
+    const room = req.query.room || "default-room";
+    const name = req.query.name || "guest";
 
-if (!PORT) {
-  console.error("❌ PORT is missing");
-  process.exit(1);
-}
+    const API_KEY = APIHhCSZmAy8QZ8;
+    const API_SECRET = voUPrcBFYZKE9sO6q3zMmjcSXYWbe8bx7tJ3v88k81X;
+    const LIVEKIT_URL = wss://spark-83iz2caa.livekit.cloud;
 
-app.listen(PORT, "0.0.0.0", () => {
-  console.log("🚀 Server running on port", PORT);
+    if (!API_KEY || !API_SECRET || !LIVEKIT_URL) {
+      console.error("❌ Missing environment variables");
+      return res.status(500).json({ error: "Missing env vars" });
+    }
+
+    const payload = {
+      iss: API_KEY,
+      sub: name,
+      video: {
+        roomJoin: true,
+        room: room,
+        canPublish: true,
+        canSubscribe: true
+      }
+    };
+
+    const token = jwt.sign(payload, API_SECRET, { expiresIn: "1h" });
+
+    res.json({
+      token,
+      url: LIVEKIT_URL
+    });
+
+  } catch (err) {
+    console.error("❌ Token error:", err);
+    res.status(500).json({ error: err.message });
+  }
 });
