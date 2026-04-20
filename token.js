@@ -1,18 +1,3 @@
-console.log("🔥 STARTING SERVER FILE");
-
-const express = require("express");
-const cors = require("cors");
-
-const app = express();
-
-app.use(cors());
-
-console.log("ENV TEST:", process.env.TEST_VAR);
-
-app.get("/", (req, res) => {
-  res.send("Backend running");
-});
-
 app.get("/token", (req, res) => {
   try {
     const jwt = require("jsonwebtoken");
@@ -20,9 +5,9 @@ app.get("/token", (req, res) => {
     const room = req.query.room || "default-room";
     const name = req.query.name || "guest";
 
-    const API_KEY = APIHhCSZmAy8QZ8;
-    const API_SECRET = voUPrcBFYZKE9sO6q3zMmjcSXYWbe8bx7tJ3v88k81X;
-    const LIVEKIT_URL = wss://spark-83iz2caa.livekit.cloud;
+    const API_KEY = process.env.LIVEKIT_API_KEY;
+    const API_SECRET = process.env.LIVEKIT_API_SECRET;
+    const LIVEKIT_URL = process.env.LIVEKIT_URL;
 
     if (!API_KEY || !API_SECRET || !LIVEKIT_URL) {
       console.error("❌ Missing environment variables");
